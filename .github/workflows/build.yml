@@ -17,10 +17,10 @@ jobs:
 
       - name: Compile
         run: |
-          cl /EHsc /DWIN32 /D_WINDOWS main.cpp user32.lib ws2_32.lib
+          cl /EHsc /DWIN32 /D_WINDOWS /DUNICODE /D_UNICODE main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: dhcp-detector
-          path: main.exe
+          path: dhcp-detector.exe
