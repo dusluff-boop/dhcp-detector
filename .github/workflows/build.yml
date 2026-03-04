@@ -1,26 +1,39 @@
-name: Build Windows EXE
+name: Build and Release Windows EXE
 
 on:
   push:
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Compile
+      - name: Compile (Unicode + Static)
         run: |
-          cl /EHsc /DWIN32 /D_WINDOWS main.cpp user32.lib ws2_32.lib
+          cl /std:c++17 ^
+             /EHsc ^
+             /DUNICODE /D_UNICODE ^
+             /DWIN32_LEAN_AND_MEAN ^
+             /MT ^
+             main.cpp ^
+             user32.lib ws2_32.lib ^
+             /Fe:dhcp-detector.exe
 
-      - name: Upload EXE
-        uses: actions/upload-artifact@v4
+      - name: Create ZIP package
+        run: |
+          powershell Compress-Archive dhcp-detector.exe dhcp-detector-${{ github.ref_name }}.zip
+
+      - name: Create Release and Upload
+        uses: softprops/action-gh-release@v2
         with:
-          name: dhcp-detector
-          path: main.exe
+          files: dhcp-detector-${{ github.ref_name }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
