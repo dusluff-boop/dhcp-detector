@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:   # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,8 +17,7 @@ jobs:
 
       - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
-        with:
-          toolset: latest
+        # 无需 with: toolset: latest
 
       - name: Compile with Visual C++ (using /utf-8 for Chinese support)
         run: |
@@ -37,7 +36,7 @@ jobs:
         shell: cmd
         continue-on-error: true
 
-      - name: Upload Artifact (EXE + source for reference)
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: dhcp-detector-windows
@@ -45,11 +44,3 @@ jobs:
             dhcp-detector.exe
             main.cpp
           retention-days: 14
-
-      # 可选：如果想每次构建都清理旧的 artifact（保持仓库整洁）
-      # - name: Delete old artifacts
-      #   uses: dawidd6/action-delete-artifact@v3
-      #   with:
-      #     name: dhcp-detector-windows
-      #     from-created: 30 days ago
-      #   continue-on-error: true
