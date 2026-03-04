@@ -17,15 +17,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Compile (Unicode + Static)
-        run: |
-          cl /std:c++17 ^
-             /EHsc ^
-             /DUNICODE /D_UNICODE ^
-             /DWIN32_LEAN_AND_MEAN ^
-             /MT ^
-             main.cpp ^
-             user32.lib ws2_32.lib ^
-             /Fe:dhcp-detector.exe
+        run: cl /std:c++17 /EHsc /DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /MT main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
 
       - name: Create ZIP package
         run: |
