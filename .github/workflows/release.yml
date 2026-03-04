@@ -1,39 +1,35 @@
-name: Build and Release DHCP Detector
+name: Build DHCP Detector
 
 on:
   push:
     tags:
-      - 'v*'   # 当你 push tag v1.3.0 触发
+      - 'v*'
 
 permissions:
-  contents: write  # Release 上传必须
+  contents: write
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    # 1️⃣ Checkout
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    # 2️⃣ 激活 MSVC 编译器环境并编译 exe
-    - name: Compile DHCP Detector
+    # 直接用 preinstalled Visual Studio Developer Command Prompt
+    - name: Build EXE
       shell: cmd
       run: |
-        REM 激活 VS 2022 Build Tools x64 环境
-        call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
+        REM 初始化 VS 编译环境
+        call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x64 || call "%VS160COMNTOOLS%..\..\VC\Auxiliary\Build\vcvarsall.bat" x64
 
         REM 编译 main.cpp
         cl /std:c++17 /EHsc /DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /MT main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
 
-    # 3️⃣ 打包 exe 为 zip
-    - name: Zip executable
+    - name: Zip exe
       shell: powershell
       run: Compress-Archive -Path dhcp-detector.exe -DestinationPath dhcp-detector-${{ github.ref_name }}.zip
 
-    # 4️⃣ 上传 Release 并附带 zip 文件
-    - name: Create GitHub Release and upload zip
+    - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: dhcp-detector-${{ github.ref_name }}.zip
