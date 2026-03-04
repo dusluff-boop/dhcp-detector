@@ -12,13 +12,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 使用 ilammy/msvc-dev-cmd 设置 MSVC 编译环境
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
+      # 编译 main.cpp，启用 Unicode 宏，生成 exe
       - name: Compile
         run: |
           cl /EHsc /DWIN32 /D_WINDOWS /DUNICODE /D_UNICODE main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
 
+      # 上传 exe 到 Artifact
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
