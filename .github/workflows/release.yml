@@ -15,20 +15,23 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # 直接用 preinstalled Visual Studio Developer Command Prompt
-    - name: Build EXE
+    # 安装 MSBuild（官方支持）
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    # 编译 main.cpp
+    - name: Compile EXE
       shell: cmd
       run: |
-        REM 初始化 VS 编译环境
-        call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x64 || call "%VS160COMNTOOLS%..\..\VC\Auxiliary\Build\vcvarsall.bat" x64
-
-        REM 编译 main.cpp
+        REM 使用 MSBuild 初始化的环境，cl.exe 自动可用
         cl /std:c++17 /EHsc /DUNICODE /D_UNICODE /DWIN32_LEAN_AND_MEAN /MT main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
 
+    # 打包 exe
     - name: Zip exe
       shell: powershell
       run: Compress-Archive -Path dhcp-detector.exe -DestinationPath dhcp-detector-${{ github.ref_name }}.zip
 
+    # 上传 Release
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
