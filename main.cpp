@@ -1,6 +1,5 @@
 #define WIN32_LEAN_AND_MEAN
 #define _WINSOCKAPI_
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -42,6 +41,7 @@ struct DHCPPacket {
 };
 #pragma pack(pop)
 
+// 获取 MAC 地址
 std::vector<BYTE> GetMacAddress()
 {
     IP_ADAPTER_INFO adapterInfo[16];
@@ -62,11 +62,13 @@ std::vector<BYTE> GetMacAddress()
     return {};
 }
 
+// 向 ListBox 添加宽字符串
 void AddToList(const std::wstring& text)
 {
     SendMessageW(hList, LB_ADDSTRING, 0, (LPARAM)text.c_str());
 }
 
+// DHCP 检测
 void DetectDHCP()
 {
     dhcpServers.clear();
@@ -106,7 +108,6 @@ void DetectDHCP()
         memcpy(packet.chaddr, mac.data(), 6);
 
     BYTE* opt = packet.options;
-
     int idx = 0;
 
     // DHCP Discover
@@ -154,7 +155,6 @@ void DetectDHCP()
         if (recvLen > 0)
         {
             BYTE* ropt = recvPacket.options;
-
             for (int i = 0; i < 300;)
             {
                 if (ropt[i] == 255)
@@ -207,6 +207,7 @@ void DetectDHCP()
     EnableWindow(hButton, TRUE);
 }
 
+// 启动检测线程
 void StartDetectThread()
 {
     EnableWindow(hButton, FALSE);
@@ -215,6 +216,7 @@ void StartDetectThread()
     }).detach();
 }
 
+// 窗口回调
 LRESULT CALLBACK WndProc(HWND hwnd,
                          UINT msg,
                          WPARAM wParam,
@@ -256,6 +258,7 @@ LRESULT CALLBACK WndProc(HWND hwnd,
                          wParam, lParam);
 }
 
+// 主函数
 int WINAPI wWinMain(HINSTANCE hInstance,
                     HINSTANCE,
                     PWSTR,
