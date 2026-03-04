@@ -1,29 +1,55 @@
-name: Build Windows EXE
+name: Build Windows EXE - DHCP Detector
 
 on:
   push:
-  workflow_dispatch:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:   # 允许手动触发
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 使用 ilammy/msvc-dev-cmd 设置 MSVC 编译环境
-      - name: Setup MSVC
+      - name: Setup MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: latest
 
-      # 编译 main.cpp，启用 Unicode 宏，生成 exe
-      - name: Compile
+      - name: Compile with Visual C++ (using /utf-8 for Chinese support)
         run: |
-          cl /EHsc /DWIN32 /D_WINDOWS /DUNICODE /D_UNICODE main.cpp user32.lib ws2_32.lib iphlpapi.lib /Fe:dhcp-detector.exe
+          cl /nologo ^
+             /EHsc ^
+             /DWIN32 /D_WINDOWS /DUNICODE /D_UNICODE ^
+             /utf-8 ^
+             main.cpp ^
+             user32.lib ws2_32.lib iphlpapi.lib ^
+             /Fe:dhcp-detector.exe ^
+             /link /SUBSYSTEM:WINDOWS
+        shell: cmd
 
-      # 上传 exe 到 Artifact
-      - name: Upload EXE
+      - name: Verify executable exists
+        run: dir dhcp-detector.exe
+        shell: cmd
+        continue-on-error: true
+
+      - name: Upload Artifact (EXE + source for reference)
         uses: actions/upload-artifact@v4
         with:
-          name: dhcp-detector
-          path: dhcp-detector.exe
+          name: dhcp-detector-windows
+          path: |
+            dhcp-detector.exe
+            main.cpp
+          retention-days: 14
+
+      # 可选：如果想每次构建都清理旧的 artifact（保持仓库整洁）
+      # - name: Delete old artifacts
+      #   uses: dawidd6/action-delete-artifact@v3
+      #   with:
+      #     name: dhcp-detector-windows
+      #     from-created: 30 days ago
+      #   continue-on-error: true
