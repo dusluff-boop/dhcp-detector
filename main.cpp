@@ -86,7 +86,7 @@ void DetectDHCP()
 
     sockaddr_in addr = {};
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(0); // 随机端口
+    addr.sin_port = htons(68); // 随机端口
     addr.sin_addr.s_addr = INADDR_ANY;
     bind(sock, (sockaddr*)&addr, sizeof(addr));
 
